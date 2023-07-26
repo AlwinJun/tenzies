@@ -21,6 +21,20 @@ main {
   place-content: center;
 }
 
+#title {
+  font-size: 2rem;
+  color: #2b283a;
+  margin-bottom: 0.5rem;
+}
+
+#info {
+  font-size: 0.8rem;
+  font-weight: 400;
+  color: #4a4e74;
+  max-width: 400px;
+  text-align: center;
+}
+
 .dice-container {
   display: grid;
   grid-template: auto auto / repeat(5, 1fr);
@@ -40,4 +54,8 @@ button {
   border: none;
   border-radius: 5px;
   cursor: pointer;
+}
+
+button:active {
+  box-shadow: inset 5px 5px 10px -3px rgba(0, 0, 0, 0.7);
 }
