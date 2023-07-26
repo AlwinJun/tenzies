@@ -3,7 +3,7 @@
 }
 
 body {
-  font-family: 'Inter', 'Karla', sans-serif;
+  font-family: 'Inter', sans-serif;
   margin: 0;
   background-color: #0b2434;
   padding: 20px;
@@ -18,10 +18,26 @@ main {
   padding: 20px;
   display: grid;
   place-items: center;
+  place-content: center;
 }
 
 .dice-container {
   display: grid;
   grid-template: auto auto / repeat(5, 1fr);
   gap: 20px;
+}
+
+button {
+  margin-top: 2rem;
+  padding: 0.375rem 1.3rem;
+  width: 92px;
+  height: 35px;
+  font-size: 1.3rem;
+  font-family: 'Karla', sans-serif;
+  text-align: center;
+  color: white;
+  background-color: #5035ff;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
