@@ -20,15 +20,34 @@ function App() {
   }
 
   function rollDice() {
-    setAllNewDice(dieNumbers());
+    setAllNewDice((prevAllNewDice) =>
+      prevAllNewDice.map((dice) =>
+        // Persist the value of hold dice
+        dice.isHeld ? dice : { id: nanoid(), value: Math.ceil(Math.random() * 6), isHeld: false }
+      )
+    );
   }
 
-  function holdDice(e) {
-    console.log(e.target.isHeld);
+  // Update the style condition of click dice
+  function holdDice(id) {
+    setAllNewDice((prevAllNewDice) => {
+      const newDiceArr = prevAllNewDice.map((dice) => {
+        if (dice.id === id) {
+          return {
+            ...dice,
+            isHeld: !dice.isHeld,
+          };
+        } else {
+          return dice;
+        }
+      });
+
+      return newDiceArr;
+    });
   }
 
-  const dice = allNewDice.map(({ id, value, isHeld }, index) => (
-    <Die key={id} value={value} isHeld={isHeld} holdDice={holdDice} />
+  const dice = allNewDice.map(({ id, value, isHeld }) => (
+    <Die key={id} value={value} isHeld={isHeld} holdDice={() => holdDice(id)} />
   ));
 
   return (
