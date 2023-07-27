@@ -12,7 +12,6 @@ body {
 main {
   background-color: #f5f5f5;
   margin: 5rem auto;
-  height: 400px;
   max-width: 800px;
   border-radius: 5px;
   padding: 20px;
@@ -28,21 +27,29 @@ main {
 }
 
 #info {
+  max-width: 400px;
+  margin-bottom: 1.4rem;
   font-size: 0.8rem;
   font-weight: 400;
   color: #4a4e74;
-  max-width: 400px;
   text-align: center;
 }
 
 .dice-container {
   display: grid;
   grid-template: auto auto / repeat(5, 1fr);
-  gap: 20px;
+  gap: 1.4rem;
+}
+
+@media (max-width: 26.25em) {
+  .dice-container {
+    gap: 1rem;
+  }
 }
 
 button {
   margin-top: 2rem;
+  margin-bottom: 1.5rem;
   padding: 0.375rem 1.3rem;
   font-size: 1.3rem;
   font-family: 'Karla', sans-serif;

@@ -1,7 +1,6 @@
 import Die from './components/Die';
 import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
-// import useWindowSize from 'react-use/lib/useWindowSize';
 import Confetti from 'react-confetti';
 import './App.css';
 
