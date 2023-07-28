@@ -5,8 +5,14 @@ import Confetti from 'react-confetti';
 import './App.css';
 
 function App() {
+  const [start, setStart] = useState(false);
+  const [time, setTime] = useState(0);
   const [allNewDice, setAllNewDice] = useState(dieNumbers());
   const [tenzies, setTenzies] = useState(false);
+
+  const minutes = String(Math.floor(time / 6000)).padStart(2, '0');
+  const seconds = String(Math.floor((time / 100) % 60)).padStart(2, '0');
+  const milliseconds = String(time % 100).padStart(2, '0');
 
   // Check if the game is over
   useEffect(() => {
@@ -17,6 +23,17 @@ function App() {
       setTenzies(true);
     }
   }, [allNewDice]);
+
+  useEffect(() => {
+    let interval;
+    if (start) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime + 1);
+      }, 10);
+    }
+
+    return () => clearInterval(interval);
+  }, [start]);
 
   function generateDie() {
     return {
@@ -50,6 +67,10 @@ function App() {
 
   // Update the style condition of click dice
   function holdDice(id) {
+    if (!start) {
+      setStart(true);
+    }
+
     setAllNewDice((prevDice) => {
       const newDiceArr = prevDice.map((dice) => {
         if (dice.id === id) {
@@ -78,9 +99,15 @@ function App() {
         Roll until all dice are the same. Click each die to freeze it at its current value between rolls.
       </p>
       <div className='dice-container'>{dice}</div>
-      <button className='dice-roll' type='button' onClick={rollDice}>
-        {!tenzies ? 'Roll' : 'New Game'}
-      </button>
+      <div className='flex-row'>
+        <div className='current-score'>
+          {seconds}:{milliseconds}
+        </div>
+        <button className='dice-roll' type='button' onClick={rollDice}>
+          {!tenzies ? 'Roll' : 'New Game'}
+        </button>
+        <div className='high-score'>00:00</div>
+      </div>
     </main>
   );
 }
