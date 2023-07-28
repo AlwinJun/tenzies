@@ -24,6 +24,7 @@ function App() {
     }
   }, [allNewDice]);
 
+  // Timer/Stopwatch
   useEffect(() => {
     let interval;
     if (start) {
@@ -96,17 +97,20 @@ function App() {
       {tenzies && <Confetti width={window.innerWidth} height={window.innerHeight} />}
       <h1 id='title'>Tenzies</h1>
       <p id='info'>
-        Roll until all dice are the same. Click each die to freeze it at its current value between rolls.
+        Roll until all dice are the same. Click each die to hold it at its current value between rolls.
       </p>
       <div className='dice-container'>{dice}</div>
       <div className='flex-row'>
         <div className='current-score'>
+          {minutes === '00' ? '' : minutes + ':'}
           {seconds}:{milliseconds}
         </div>
         <button className='dice-roll' type='button' onClick={rollDice}>
           {!tenzies ? 'Roll' : 'New Game'}
         </button>
-        <div className='high-score'>00:00</div>
+        <div className=''>
+          <span className='high-score'>00:00</span>
+        </div>
       </div>
     </main>
   );
