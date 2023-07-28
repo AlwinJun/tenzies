@@ -1,4 +1,4 @@
-import { BsDice1, BsDice2, BsDice3, BsDice4, BsDice5, BsDice6 } from 'react-icons/Bs';
+import { BsDice1, BsDice2, BsDice3, BsDice4, BsDice5, BsDice6 } from '/node_modules/react-icons/bs';
 import './Die.css';
 
 export default function Die({ value, isHeld, holdDice }) {
