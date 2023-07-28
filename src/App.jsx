@@ -83,6 +83,7 @@ function App() {
     } else {
       setAllNewDice(dieNumbers());
       setTenzies(false);
+      setTime(0);
     }
   }
 
