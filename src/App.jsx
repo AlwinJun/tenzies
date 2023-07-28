@@ -10,9 +10,21 @@ function App() {
   const [allNewDice, setAllNewDice] = useState(dieNumbers());
   const [tenzies, setTenzies] = useState(false);
 
+  const lowestTime = JSON.parse(localStorage.getItem('lowestTime')) || 0;
+
+  // Convert the time interval into mm:ss:ms
   const minutes = String(Math.floor(time / 6000)).padStart(2, '0');
   const seconds = String(Math.floor((time / 100) % 60)).padStart(2, '0');
   const milliseconds = String(time % 100).padStart(2, '0');
+
+  // Convert miliseconds into mm:ss:ms
+  const mm = 60 * 1000; //There are 60000 milliseconds in a minute
+  const millisec = parseInt(lowestTime);
+  const toMinutes = String(Math.floor(millisec / mm)).padStart(2, '0');
+  const toSeconds = String(((millisec % mm) / 1000).toFixed(0)).padStart(2, '0');
+  const toMs = String(millisec % 1000).padStart(2, '0');
+
+  const convertToMilliseconds = parseInt(minutes) * 60000 + parseInt(seconds) * 1000 + parseInt(milliseconds);
 
   // Check if the game is over
   useEffect(() => {
@@ -20,7 +32,15 @@ function App() {
     const refValue = allNewDice[0].value;
     const allSameValue = allNewDice.every((dice) => dice.value === refValue);
     if (isEveryHeld && allSameValue) {
+      if (!lowestTime) {
+        localStorage.setItem('lowestTime', JSON.stringify(convertToMilliseconds));
+      } else {
+        const minTime = Math.min(convertToMilliseconds, parseInt(lowestTime));
+        localStorage.setItem('lowestTime', JSON.stringify(minTime));
+      }
+      console.log({ time, convertToMilliseconds });
       setTenzies(true);
+      setStart(false);
     }
   }, [allNewDice]);
 
@@ -92,6 +112,12 @@ function App() {
     <Die key={id} value={value} isHeld={isHeld} holdDice={() => holdDice(id)} />
   ));
 
+  let lowestTimeElement;
+  if (!lowestTime) {
+    lowestTimeElement = '00:00';
+  } else {
+    lowestTimeElement = `${toMinutes}:${toSeconds}:${toMs}`;
+  }
   return (
     <main>
       {tenzies && <Confetti width={window.innerWidth} height={window.innerHeight} />}
@@ -102,15 +128,13 @@ function App() {
       <div className='dice-container'>{dice}</div>
       <div className='flex-row'>
         <div className='current-score'>
-          {minutes === '00' ? '' : minutes + ':'}
-          {seconds}:{milliseconds}
+          {minutes === '00' ? 'mm' : minutes}:{seconds === '00' ? 'ss' : seconds}:
+          {milliseconds === '00' ? 'ms' : milliseconds}
         </div>
         <button className='dice-roll' type='button' onClick={rollDice}>
           {!tenzies ? 'Roll' : 'New Game'}
         </button>
-        <div className=''>
-          <span className='high-score'>00:00</span>
-        </div>
+        <span className='high-score'>{lowestTimeElement}</span>
       </div>
     </main>
   );
