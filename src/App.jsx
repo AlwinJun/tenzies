@@ -1,62 +1,59 @@
+import React, { useEffect, useState } from 'react';
 import Die from './components/Die';
-import { useEffect, useState } from 'react';
 import { nanoid } from 'nanoid';
 import Confetti from 'react-confetti';
 import './App.css';
 
 function App() {
-  const [start, setStart] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false);
   const [time, setTime] = useState(0);
-  const [allNewDice, setAllNewDice] = useState(dieNumbers());
-  const [tenzies, setTenzies] = useState(false);
+  const [diceList, setDiceList] = useState(generateDiceList());
+  const [isTenzies, setIsTenzies] = useState(false);
 
   const lowestTime = JSON.parse(localStorage.getItem('lowestTime')) || 0;
-
-  // Convert the time interval into mm:ss:ms
-  const minutes = String(Math.floor(time / 6000)).padStart(2, '0');
-  const seconds = String(Math.floor((time / 100) % 60)).padStart(2, '0');
-  const milliseconds = String(time % 100).padStart(2, '0');
-
-  // Convert miliseconds into mm:ss:ms
-  const mm = 60 * 1000; //There are 60000 milliseconds in a minute
-  const millisec = parseInt(lowestTime);
-  const toMinutes = String(Math.floor(millisec / mm)).padStart(2, '0');
-  const toSeconds = String(((millisec % mm) / 1000).toFixed(0)).padStart(2, '0');
-  const toMs = String(millisec % 1000).padStart(2, '0');
-
-  const convertToMilliseconds = parseInt(minutes) * 60000 + parseInt(seconds) * 1000 + parseInt(milliseconds);
-
-  // Check if the game is over
-  useEffect(() => {
-    const isEveryHeld = allNewDice.every((dice) => dice.isHeld);
-    const refValue = allNewDice[0].value;
-    const allSameValue = allNewDice.every((dice) => dice.value === refValue);
-    if (isEveryHeld && allSameValue) {
-      if (!lowestTime) {
-        localStorage.setItem('lowestTime', JSON.stringify(convertToMilliseconds));
-      } else {
-        const minTime = Math.min(convertToMilliseconds, parseInt(lowestTime));
-        localStorage.setItem('lowestTime', JSON.stringify(minTime));
-      }
-      console.log({ time, convertToMilliseconds });
-      setTenzies(true);
-      setStart(false);
-    }
-  }, [allNewDice]);
 
   // Timer/Stopwatch
   useEffect(() => {
     let interval;
-    if (start) {
+    if (gameStarted) {
       interval = setInterval(() => {
         setTime((prevTime) => prevTime + 1);
       }, 10);
     }
 
     return () => clearInterval(interval);
-  }, [start]);
+  }, [gameStarted]);
 
-  function generateDie() {
+  // Check if the game is over
+  useEffect(() => {
+    const isEveryHeld = diceList.every((dice) => dice.isHeld);
+    const refValue = diceList[0].value;
+    const allSameValue = diceList.every((dice) => dice.value === refValue);
+
+    if (isEveryHeld && allSameValue) {
+      if (!lowestTime) {
+        localStorage.setItem('lowestTime', JSON.stringify(time));
+      } else {
+        console.log(typeof time, typeof lowestTime);
+        const minTime = Math.min(time, parseInt(lowestTime));
+        localStorage.setItem('lowestTime', JSON.stringify(minTime));
+      }
+      setIsTenzies(true);
+      setGameStarted(false);
+    }
+  }, [diceList]);
+
+  function getTimeParts(timeInMilliseconds) {
+    const minutes = String(Math.floor(timeInMilliseconds / 6000)).padStart(2, '0');
+    const seconds = String(Math.floor((timeInMilliseconds / 100) % 60)).padStart(2, '0');
+    const milliseconds = String(timeInMilliseconds % 100).padStart(2, '0');
+    return { minutes, seconds, milliseconds };
+  }
+
+  const { minutes, seconds, milliseconds } = getTimeParts(time);
+  const { minutes: toMinutes, seconds: toSeconds, milliseconds: toMs } = getTimeParts(lowestTime);
+
+  function generateDice() {
     return {
       id: nanoid(),
       value: Math.ceil(Math.random() * 6),
@@ -64,76 +61,62 @@ function App() {
     };
   }
 
-  function dieNumbers() {
-    const arrNum = [];
+  function generateDiceList() {
+    const diceList = [];
     for (let i = 0; i < 10; i++) {
-      arrNum.push(generateDie());
+      diceList.push(generateDice());
     }
-    return arrNum;
+    return diceList;
   }
 
   function rollDice() {
-    if (!tenzies) {
-      setAllNewDice((prevDice) =>
-        prevDice.map((dice) =>
+    if (!isTenzies) {
+      setDiceList((prevDiceList) =>
+        prevDiceList.map((dice) =>
           // Persist the value of hold dice
-          dice.isHeld ? dice : generateDie()
+          dice.isHeld ? dice : generateDice()
         )
       );
     } else {
-      setAllNewDice(dieNumbers());
-      setTenzies(false);
+      // New Game
+      setDiceList(generateDiceList());
+      setIsTenzies(false);
       setTime(0);
     }
   }
 
   // Update the style condition of click dice
   function holdDice(id) {
-    if (!start) {
-      setStart(true);
+    if (!gameStarted) {
+      // Start timer
+      setGameStarted(true);
     }
-
-    setAllNewDice((prevDice) => {
-      const newDiceArr = prevDice.map((dice) => {
-        if (dice.id === id) {
-          return {
-            ...dice,
-            isHeld: !dice.isHeld,
-          };
-        } else {
-          return dice;
-        }
-      });
-
-      return newDiceArr;
-    });
+    setDiceList((prevDice) =>
+      prevDice.map((dice) => (dice.id === id ? { ...dice, isHeld: !dice.isHeld } : dice))
+    );
   }
 
-  const dice = allNewDice.map(({ id, value, isHeld }) => (
+  const diceElements = diceList.map(({ id, value, isHeld }) => (
     <Die key={id} value={value} isHeld={isHeld} holdDice={() => holdDice(id)} />
   ));
 
-  let lowestTimeElement;
-  if (!lowestTime) {
-    lowestTimeElement = '00:00';
-  } else {
+  let lowestTimeElement = '00:00';
+  if (lowestTime) {
     lowestTimeElement = `${toMinutes}:${toSeconds}:${toMs}`;
   }
+
   return (
     <main>
-      {tenzies && <Confetti width={window.innerWidth} height={window.innerHeight} />}
+      {isTenzies && <Confetti width={window.innerWidth} height={window.innerHeight} />}
       <h1 id='title'>Tenzies</h1>
       <p id='info'>
         Roll until all dice are the same. Click each die to hold it at its current value between rolls.
       </p>
-      <div className='dice-container'>{dice}</div>
+      <div className='dice-container'>{diceElements}</div>
       <div className='flex-row'>
-        <div className='current-score'>
-          {minutes === '00' ? 'mm' : minutes}:{seconds === '00' ? 'ss' : seconds}:
-          {milliseconds === '00' ? 'ms' : milliseconds}
-        </div>
+        <div className='current-score'>{`${minutes}:${seconds}:${milliseconds}`}</div>
         <button className='dice-roll' type='button' onClick={rollDice}>
-          {!tenzies ? 'Roll' : 'New Game'}
+          {!isTenzies ? 'Roll' : 'New Game'}
         </button>
         <span className='high-score'>{lowestTimeElement}</span>
       </div>
